@@ -1,4 +1,16 @@
-//SIMON SAYS
+/*
+    Simon
+    Lead development by FJ Rios
+    original game Simon
+    
+    --------------------
+    Blinks by Move38
+    Brought to life via Kickstarter 2018
+
+    @madewithblinks
+    www.move38.com
+    --------------------
+*/
 #define __DELAY_BACKWARD_COMPATIBLE__
 #include <util/delay.h>
 enum gameStates {INS, R, Y, B, G, O, M, MASTER, GAME, END};  //tile states
