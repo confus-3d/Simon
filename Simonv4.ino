@@ -295,6 +295,7 @@ int flag = 0; //this flag indicates if the sequence is correct
           your_sequence[i] = getLastValueReceivedOnFace(f);
           flag = 1;
           _delay_ms(200);
+          setValueSentOnAllFaces(6);
           if (your_sequence[i] != sequence[i])
             {
             wrong_sequence();
