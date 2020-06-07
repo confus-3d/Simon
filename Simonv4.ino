@@ -1,6 +1,4 @@
 //SIMON SAYS
-#define __DELAY_BACKWARD_COMPATIBLE__
-#include <util/delay.h>
 enum gameStates {INS, R, Y, B, G, O, M, MASTER, GAME, END};  //tile states
 byte gameState = INS;
 int numNeighbors;
@@ -10,8 +8,11 @@ int sendingSwitch2 = 0;
 int MAX_COLOURS = 0;
 int COLOUR;
 int SHOWCOLOUR;
+Timer waitingTimer;
+int flag;
+int done;
 
-const int MAX_LEVEL = 50;
+#define MAX_LEVEL 10
 int sequence[MAX_LEVEL];
 int your_sequence[MAX_LEVEL];
 int level = 1;
@@ -173,8 +174,16 @@ detectLoop();
 
 void masterLoop() {
   sendingLoop2();
-  if (level == 1)
-  generate_sequence();
+  if (level == 1){
+    generate_sequence(); 
+    int flag = 0;
+    waitingTimer.set(2000);
+    while(flag == 0){
+      if (waitingTimer.isExpired()) {
+        flag = 1;
+      }
+    }
+  }
   show_sequence();
   get_sequence();
 }
@@ -186,7 +195,13 @@ void gameLoop() {
     if ( !isValueReceivedOnFaceExpired( f ) ) {
       SHOWCOLOUR = (getLastValueReceivedOnFace(f));
       setValueSentOnAllFaces(SHOWCOLOUR);
-      _delay_ms(200);
+      int flag = 0;
+      waitingTimer.set(200);
+      while(flag == 0){
+        if (waitingTimer.isExpired()) {
+        flag = 1;
+        }
+      }
   }
   }
     if (buttonSingleClicked()){
@@ -202,26 +217,26 @@ void gameLoop() {
 }
 
 void gameDisplayLoop() {
-switch (COLOUR) {
-  case 0:
-      setColor( dim( RED ,  brightness  ) ); 
-      break;    
-  case 1:
-      setColor( dim( YELLOW ,  brightness  ) );  
-      break;
-  case 2:
-      setColor( dim( BLUE ,  brightness  ) );
-      break;
-  case 3:
-      setColor( dim( GREEN ,  brightness  ) );
-      break;
-  case 4:
-      setColor( dim( ORANGE ,  brightness  ) );
-      break;
-  case 5:
-      setColor( dim( MAGENTA ,  brightness  ) );
-      break;
-}
+  switch (COLOUR) {
+    case 0:
+        setColor( dim( RED ,  brightness  ) ); 
+        break;    
+    case 1:
+        setColor( dim( YELLOW ,  brightness  ) );  
+        break;
+    case 2:
+        setColor( dim( BLUE ,  brightness  ) );
+        break;
+    case 3:
+        setColor( dim( GREEN ,  brightness  ) );
+        break;
+    case 4:
+        setColor( dim( ORANGE ,  brightness  ) );
+        break;
+    case 5:
+        setColor( dim( MAGENTA ,  brightness  ) );
+        break;
+  }
 }
 
 void sendingLoop() {
@@ -254,102 +269,135 @@ void detectLoop() {
 }
 
 
-void generate_sequence()
-{
-
-for (int i = 0; i < MAX_LEVEL; i++)
-{
-sequence[i] = random(MAX_COLOURS);
-}
+void generate_sequence(){
+  for (int i = 0; i < MAX_LEVEL; i++){
+    sequence[i] = random(MAX_COLOURS);
+  }
 }
 
-void show_sequence()
-{
-for (int i = 0; i < level; i++)
-{
-setValueSentOnAllFaces(sequence[i]);
-if (COLOUR == sequence[i]){
-  brightness = 255;
-  gameDisplayLoop();
-  _delay_ms(velocity);
-  brightness = 100;
-  gameDisplayLoop();
-}
-if (COLOUR != sequence[i]){
-  _delay_ms(velocity);
-}
-setValueSentOnAllFaces(6);
-_delay_ms(200);
-}
-}
-
-void get_sequence()
-{
-int flag = 0; //this flag indicates if the sequence is correct
-  for (int i = 0; i < level; i++)
-  {
-  flag = 0;
-    while(flag == 0){
-      FOREACH_FACE(f) {
-        if ( !isValueReceivedOnFaceExpired( f ) ) {
-          your_sequence[i] = getLastValueReceivedOnFace(f);
+void show_sequence(){
+  for (int i = 0; i < level; i++){
+    setValueSentOnAllFaces(sequence[i]);
+    if (COLOUR == sequence[i]){
+      brightness = 255;
+      gameDisplayLoop();
+    }
+    flag = 0;
+        waitingTimer.set(velocity);
+          while(flag == 0){
+          if (waitingTimer.isExpired()) {
           flag = 1;
-          _delay_ms(200);
-          setValueSentOnAllFaces(6);
-          if (your_sequence[i] != sequence[i])
-            {
-            wrong_sequence();
-            return;
+          }
+    }
+    brightness = 100;
+    gameDisplayLoop();
+    setValueSentOnAllFaces(6);
+        flag = 0;
+        waitingTimer.set(200);
+          while(flag == 0){
+          if (waitingTimer.isExpired()) {
+          flag = 1;
+          }
+        }
+  }
+}
+
+void get_sequence() {
+  
+  for (int i = 0; i < level; i++){
+    done = 0;
+      while(done == 0){
+        FOREACH_FACE(f) {
+          if ( !isValueReceivedOnFaceExpired( f ) ) {
+            your_sequence[i] = getLastValueReceivedOnFace(f);
+            done = 1;
+              flag = 0;
+              waitingTimer.set(200);
+                while(flag == 0){
+                  if (waitingTimer.isExpired()) {
+                  flag = 1;
+                }
+              }
+            setValueSentOnAllFaces(6);
+              flag = 0;
+              waitingTimer.set(200);
+                while(flag == 0){
+                  if (waitingTimer.isExpired()) {
+                  flag = 1;
+                }
+              }
+            if (your_sequence[i] != sequence[i]){
+              wrong_sequence();
+              return;
             }
+          }
         }
       }
-    }
   }
 right_sequence();
 }
 
-void wrong_sequence()
-{
-  
-for (int i = 0; i < 3; i++)
-{
-
-setValueSentOnAllFaces(7);
-_delay_ms(250);
-
-setValueSentOnAllFaces(6);
-_delay_ms(250);
-}
-level = 1;
-velocity = 1000;
-}
-
-void right_sequence()
-{
-setValueSentOnAllFaces(7);
-_delay_ms(1000);
-
-setValueSentOnAllFaces(6);
-_delay_ms(250);
-
-
-if (level < MAX_LEVEL){
- level++; 
-}
-
-if (level == MAX_LEVEL){
-  setValueSentOnAllFaces(7);
-  _delay_ms(1000);
-  level = 1;
+void wrong_sequence(){
+  for (int i = 0; i < 3; i++){//DO IT 3 TIMES
+    setValueSentOnAllFaces(7);//ALL LEDS ON
+              flag = 0;
+              waitingTimer.set(250);
+                while(flag == 0){
+                if (waitingTimer.isExpired()) {
+                flag = 1;
+                }
+              }
+    setValueSentOnAllFaces(6);//ALL LEDS DIM
+              flag = 0;
+              waitingTimer.set(250);
+                while(flag == 0){
+                if (waitingTimer.isExpired()) {
+                flag = 1;
+                }
+              }
+  }
+  level = 1; //RESTART
   velocity = 1000;
+}
+
+void right_sequence(){
+  setValueSentOnAllFaces(7);
+              flag = 0;
+              waitingTimer.set(1000);
+                while(flag == 0){
+                if (waitingTimer.isExpired()) {
+                flag = 1;
+                }
+              }
+  setValueSentOnAllFaces(6);
+              flag = 0;
+              waitingTimer.set(250);
+                while(flag == 0){
+                if (waitingTimer.isExpired()) {
+                flag = 1;
+                }
+              }
+
+  if (level < MAX_LEVEL){
+   level++; 
+  }
   
-}
-
-velocity -= 50; //increase difficulty until level 10
-if (velocity < 500){
- velocity = 500;
-}
-
+  if (velocity > 500){
+   velocity -= 50;
+  }
+  
+  if (level == MAX_LEVEL){
+    setValueSentOnAllFaces(7);
+              flag = 0;
+              waitingTimer.set(1000);
+                while(flag == 0){
+                if (waitingTimer.isExpired()) {
+                flag = 1;
+                }
+              }
+    level = 1;
+    velocity = 1000; 
+  }
 }
 
 //COMMUNICATION
