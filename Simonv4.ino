@@ -1,16 +1,4 @@
-/*
-    Simon
-    Lead development by FJ Rios
-    original game Simon
-    
-    --------------------
-    Blinks by Move38
-    Brought to life via Kickstarter 2018
-
-    @madewithblinks
-    www.move38.com
-    --------------------
-*/
+//SIMON SAYS
 #define __DELAY_BACKWARD_COMPATIBLE__
 #include <util/delay.h>
 enum gameStates {INS, R, Y, B, G, O, M, MASTER, GAME, END};  //tile states
@@ -43,21 +31,27 @@ void loop() {
       break;
   case R:
       RLoop();
+      gameDisplayLoop();
       break;
   case Y:
       YLoop();
+      gameDisplayLoop();
       break;
   case B:
       BLoop();
+      gameDisplayLoop();
       break;
   case G:
       GLoop();
+      gameDisplayLoop();
       break;
   case O:
       OLoop();
+      gameDisplayLoop();
       break;
   case M:
       MLoop();
+      gameDisplayLoop();
       break;
   case GAME:
       gameLoop();
