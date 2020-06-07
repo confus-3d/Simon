@@ -67,11 +67,20 @@ void loop() {
   
 //RESET GAME
   if (buttonLongPressed()) {
+    setValueSentOnAllFaces(8);
     sendingSwitch = 0;
     sendingSwitch2 = 0;
     MAX_COLOURS = 0;
     level = 1;
     gameState = INS;
+    brightness = 100;
+          flag = 0;
+          waitingTimer.set(200);
+          while(flag == 0){
+            if (waitingTimer.isExpired()) {
+            flag = 1;
+            }
+          }
   }
 
 }
@@ -195,7 +204,7 @@ void gameLoop() {
     if ( !isValueReceivedOnFaceExpired( f ) ) {
       SHOWCOLOUR = (getLastValueReceivedOnFace(f));
       setValueSentOnAllFaces(SHOWCOLOUR);
-      int flag = 0;
+      flag = 0;
       waitingTimer.set(200);
       while(flag == 0){
         if (waitingTimer.isExpired()) {
@@ -237,6 +246,22 @@ void gameDisplayLoop() {
         setColor( dim( MAGENTA ,  brightness  ) );
         break;
   }
+    if (SHOWCOLOUR == 8) {
+    setValueSentOnAllFaces(8);
+    sendingSwitch = 0;
+    sendingSwitch2 = 0;
+    MAX_COLOURS = 0;
+    level = 1;
+    gameState = INS;
+    brightness = 100;
+          flag = 0;
+          waitingTimer.set(200);
+          while(flag == 0){
+            if (waitingTimer.isExpired()) {
+            flag = 1;
+            }
+          }
+  } 
 }
 
 void sendingLoop() {
@@ -310,6 +335,22 @@ void get_sequence() {
         FOREACH_FACE(f) {
           if ( !isValueReceivedOnFaceExpired( f ) ) {
             your_sequence[i] = getLastValueReceivedOnFace(f);
+                if (your_sequence[i] == 8) {
+                  setValueSentOnAllFaces(8);
+                  sendingSwitch = 0;
+                  sendingSwitch2 = 0;
+                  MAX_COLOURS = 0;
+                  level = 1;
+                  gameState = INS;
+                  brightness = 100;
+                        flag = 0;
+                        waitingTimer.set(200);
+                        while(flag == 0){
+                          if (waitingTimer.isExpired()) {
+                          flag = 1;
+                          }
+                        }
+                }
             done = 1;
               flag = 0;
               waitingTimer.set(200);
